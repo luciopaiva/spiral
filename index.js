@@ -5,9 +5,10 @@ function getCssVar(name) {
     return window.getComputedStyle(document.documentElement).getPropertyValue(name);
 }
 
-class Sieve {
+class PrimeSieve {
     constructor (maxNumber) {
         this.maxNumber = maxNumber;
+        this.count = 0;
 
         /** @type {Boolean[]} */
         this.numbers = Array(maxNumber - 1);  // maxNumber inclusive, but exclude 0 and 1
@@ -16,6 +17,7 @@ class Sieve {
             // if it was not visited yet, mark as prime
             if (this.numbers[i - 2] === undefined) {
                 this.numbers[i - 2] = true;
+                this.count++;
 
                 // check all multiples and mark as not prime
                 let j = i;
@@ -31,7 +33,7 @@ class Sieve {
      * @param {Number} number
      * @returns {Boolean}
      */
-    isPrime(number) {
+    query(number) {
         if (number < 2) {
             return false;
         } else if (number > this.maxNumber) {
@@ -41,11 +43,41 @@ class Sieve {
     }
 }
 
+class RandomSieve {
+    /**
+     * A sieve that selects random numbers. To be used to demonstrate that random numbers don't show patterns.
+     *
+     * @param {Number} maxNumber
+     * @param {Number} threshold - probability for a number to be selected - set this to the probability of a number to
+     *                             be a prime, so that the density will be similar to the prime sieve
+     */
+    constructor (maxNumber, threshold) {
+        this.maxNumber = maxNumber;
+        this.numbers = Array(maxNumber + 1);
+
+        for (let i = 0; i <= maxNumber; i++) {
+            this.numbers[i] = Math.random() < threshold;
+        }
+    }
+
+    query(number) {
+        if (number < 0) {
+            return false;
+        } else if (number > this.maxNumber) {
+            throw new Error(`This sieve only goes up to number ${this.maxNumber}.`);
+        }
+        return this.numbers[number];
+    }
+}
+
 class Spiral {
 
     constructor () {
         this.MAX_NUMBER = 100000;
-        this.sieve = new Sieve(this.MAX_NUMBER);
+        this.MAX_NUMBER_BEFORE_UI_SUFFERS = 10000;
+        this.primeSieve = new PrimeSieve(this.MAX_NUMBER);
+        this.randomSieve = new RandomSieve(this.MAX_NUMBER, this.primeSieve.count / this.MAX_NUMBER);
+        this.sieve = null;
         this.dotSize = 5;
         this.halfDotSize = this.dotSize / 2;
 
@@ -60,6 +92,8 @@ class Spiral {
         this.numberSpacingElement.addEventListener("input", this.draw.bind(this));
         this.radiusFactorElement = document.getElementById("radius-factor");
         this.radiusFactorElement.addEventListener("input", this.draw.bind(this));
+        this.randomModeElement = document.getElementById("random-mode");
+        this.randomModeElement.addEventListener("input", this.draw.bind(this));
         this.showNumbersElement = document.getElementById("show-numbers");
         this.showNumbersElement.addEventListener("input", this.draw.bind(this));
         this.onlyPrimesElement = document.getElementById("only-primes");
@@ -88,6 +122,8 @@ class Spiral {
     }
 
     draw() {
+        this.sieve = this.randomModeElement.checked ? this.randomSieve : this.primeSieve;
+
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
@@ -98,11 +134,28 @@ class Spiral {
         this.context.fillStyle = this.backgroundColor;
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // this.drawSpiral();
-        this.drawNumbers();
+        const numberSpacing = parseFloat(this.numberSpacingElement.value);
+        const radiusFactor = parseFloat(this.radiusFactorElement.value);
+        console.info(numberSpacing, radiusFactor);
+        const diagonal = Math.ceil(Math.sqrt(this.centerX ** 2 + this.centerY ** 2));
+        const greatestNumberToShow = this.calculateGreatestNumberToShow(numberSpacing, radiusFactor, diagonal);
+        console.info(greatestNumberToShow);
+
+        if (greatestNumberToShow < this.MAX_NUMBER_BEFORE_UI_SUFFERS) {
+            this.drawSpiral();
+            this.showNumbersElement.disabled = false;
+            this.onlyPrimesElement.disabled = false;
+        } else {
+            this.showNumbersElement.disabled = true;
+            this.onlyPrimesElement.disabled = true;
+        }
+        this.drawNumbers(greatestNumberToShow, radiusFactor, numberSpacing, diagonal);
     }
 
     drawSpiral() {
+        const numberSpacing = 1;  // parseFloat(this.numberSpacingElement.value);
+        const radiusFactor = parseFloat(this.radiusFactorElement.value);
+
         const diagonal = Math.ceil(Math.sqrt(this.centerX ** 2 + this.centerY ** 2));
         const ctx = this.context;
 
@@ -110,44 +163,59 @@ class Spiral {
         ctx.strokeStyle = this.strokeColor;
         ctx.moveTo(this.centerX, this.centerY);
 
+        let theta = .6;
+
         let radius = 0;
         let angle = 0;
         while (radius < diagonal) {  // assures that the whole screen will be covered with the spiral
+            angle = theta;
+
             ctx.lineTo(...this.toSpiral(angle, radius));
 
-            radius += 0.01;
-            angle += 0.005;
+            radius = radiusFactor * theta;
+            theta += numberSpacing / radius;
         }
 
         ctx.stroke();
     }
 
-    drawNumbers() {
-        const numberSpacing = parseFloat(this.numberSpacingElement.value);
-        const radiusFactor = parseFloat(this.radiusFactorElement.value);
-        console.info(numberSpacing, radiusFactor);
+    calculateGreatestNumberToShow(step, radiusFactor, diagonal) {
+        let theta = 0.6;
+        let radius = radiusFactor * theta;
+        let greatestNumberToShow = 1;
+        while (greatestNumberToShow < this.MAX_NUMBER && radius < diagonal) {
+            radius = radiusFactor * theta;
+            theta += step / radius;
+            greatestNumberToShow++;
+        }
+        return greatestNumberToShow;
+    }
+
+    drawNumbers(greatestNumberToShow, radiusFactor, numberSpacing) {
+        const showNumbers = this.showNumbersElement.checked && greatestNumberToShow < this.MAX_NUMBER_BEFORE_UI_SUFFERS;
+        const onlyPrimes = this.onlyPrimesElement.checked || greatestNumberToShow >= this.MAX_NUMBER_BEFORE_UI_SUFFERS;
 
         const rotation = 1;
 
-        let theta = 2.5;
-        let currentRadius = 0;
+        let theta = .6;
+        let currentRadius = radiusFactor * theta;
 
         this.context.textAlign = "center";
         this.context.textBaseline = "middle";
 
-        for (let i = 1; i < this.MAX_NUMBER; i++) {
+        for (let i = 1; i < greatestNumberToShow; i++) {
             const currentAngle = theta + rotation;
-            const isPrime = this.sieve.isPrime(i);
+            const isPrime = this.sieve.query(i);
 
             const x = Math.round(this.centerX + currentRadius * Math.cos(currentAngle));
             const y = Math.round(this.centerY + currentRadius * Math.sin(currentAngle));
 
-            if (this.showNumbersElement.checked) {
+            if (showNumbers) {
                 if (isPrime) {
                     this.context.fillStyle = this.primeColor;
                     this.context.font = "bold 7pt monospace";
                     this.context.fillText(i.toString(), x, y);
-                } else if (!this.onlyPrimesElement.checked) {
+                } else if (!onlyPrimes) {
                     this.context.fillStyle = this.nonPrimeColor;
                     this.context.font = "7pt monospace";
                     this.context.fillText(i.toString(), x, y);
@@ -156,7 +224,7 @@ class Spiral {
                 if (isPrime) {
                     this.context.fillStyle = this.primeColor;
                     this.drawDot(x, y);
-                } else if (!this.onlyPrimesElement.checked) {
+                } else if (!onlyPrimes) {
                     this.context.fillStyle = this.nonPrimeColor;
                     this.drawDot(x, y);
                 }
