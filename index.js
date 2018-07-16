@@ -1,4 +1,6 @@
 
+const TAU = Math.PI * 2;
+
 function getCssVar(name) {
     return window.getComputedStyle(document.documentElement).getPropertyValue(name);
 }
@@ -44,35 +46,39 @@ class Spiral {
     constructor () {
         this.MAX_NUMBER = 5000;
         this.sieve = new Sieve(this.MAX_NUMBER);
+        this.dotSize = 9;
+        this.halfDotSize = this.dotSize / 2;
 
         this.canvas = document.getElementById("canvas");
         this.context = this.canvas.getContext("2d");
         this.backgroundColor = getCssVar("--background-color");
         this.strokeColor = getCssVar("--stroke-color");
+        this.primeColor = getCssVar("--prime-color");
+        this.nonPrimeColor = getCssVar("--non-prime-color");
 
-        this.radiusElement = document.getElementById("radius");
-        this.radiusElement.addEventListener("input", this.draw.bind(this));
+        this.numberSpacingElement = document.getElementById("number-spacing");
+        this.numberSpacingElement.addEventListener("input", this.draw.bind(this));
         this.angleElement = document.getElementById("angle");
         this.angleElement.addEventListener("input", this.draw.bind(this));
+        this.showNumbersElement = document.getElementById("show-numbers");
+        this.showNumbersElement.addEventListener("input", this.draw.bind(this));
+        this.onlyPrimesElement = document.getElementById("only-primes");
+        this.onlyPrimesElement.addEventListener("input", this.draw.bind(this));
+
+        this.infoWindow = document.getElementById("info-window");
+        this.infoButton = document.getElementById("info-button");
+        this.infoButton.addEventListener("click", (event) => {
+            this.infoWindow.classList.toggle("hidden");
+            event.stopPropagation();
+        });
+        document.addEventListener("click", () => this.infoWindow.classList.add("hidden"));
 
         this.centerX = 0;
         this.centerY = 0;
-        this.numberElements = [];
 
         window.addEventListener("resize", this.draw.bind(this));
 
-        // this.makeNumbers();
         this.draw();
-    }
-
-    makeNumbers() {
-        for (let number = 1; number < this.MAX_NUMBER; number++) {
-            const span = document.createElement("span");
-            span.classList.add("number");
-            span.innerText = number.toString();
-            this.numberElements.push(span);
-            document.body.appendChild(span);
-        }
     }
 
     toSpiral(angle, radius) {
@@ -119,38 +125,55 @@ class Spiral {
     }
 
     drawNumbers() {
+        const numberSpacing = parseFloat(this.numberSpacingElement.value);
         const angleStep = parseFloat(this.angleElement.value);
-        const radiusStep = parseFloat(this.radiusElement.value);
-        console.info(angleStep, radiusStep);
+        console.info(angleStep, numberSpacing);
 
-        const awayStep = 4;  //angleStep;
-        const chord = 25;
+        const radiusStep = 1;
         const rotation = 1;
 
         let theta = 2.5;  // chord / awayStep;
-        let away = 0;
+        let currentRadius = 0;
 
         this.context.textAlign = "center";
         this.context.textBaseline = "middle";
 
         for (let i = 1; i < this.MAX_NUMBER; i++) {
-            const around = theta + rotation;
+            const currentAngle = theta + rotation;
+            const isPrime = this.sieve.isPrime(i);
 
-            const x = Math.round(this.centerX + away * Math.cos(around));
-            const y = Math.round(this.centerY + away * Math.sin(around));
+            const x = Math.round(this.centerX + currentRadius * Math.cos(currentAngle));
+            const y = Math.round(this.centerY + currentRadius * Math.sin(currentAngle));
 
-            if (this.sieve.isPrime(i)) {
-                this.context.fillStyle = "blue";
-                this.context.font = "bold 7pt monospace";
+            if (this.showNumbersElement.checked) {
+                if (isPrime) {
+                    this.context.fillStyle = this.primeColor;
+                    this.context.font = "bold 7pt monospace";
+                    this.context.fillText(i.toString(), x, y);
+                } else if (!this.onlyPrimesElement.checked) {
+                    this.context.fillStyle = this.nonPrimeColor;
+                    this.context.font = "7pt monospace";
+                    this.context.fillText(i.toString(), x, y);
+                }
             } else {
-                this.context.fillStyle = "gray";
-                this.context.font = "7pt monospace";
+                if (isPrime) {
+                    this.context.fillStyle = this.primeColor;
+                    this.drawDot(x, y);
+                } else if (!this.onlyPrimesElement.checked) {
+                    this.context.fillStyle = this.nonPrimeColor;
+                    this.drawDot(x, y);
+                }
             }
-            this.context.fillText(i.toString(), x, y);
 
-            away = awayStep * theta;
-            theta += chord / away;
+            currentRadius = radiusStep * theta;
+            theta += numberSpacing / currentRadius;
         }
+    }
+
+    drawDot(x, y) {
+        this.context.beginPath();
+        this.context.arc(x, y, this.halfDotSize, 0, TAU);
+        this.context.fill();
     }
 }
 

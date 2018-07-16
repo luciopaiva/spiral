@@ -8,21 +8,63 @@
         :root {
             --background-color: #d4d4d4;
             --stroke-color: #bbbbbb;
+            --prime-color: #ff153c;
+            --non-prime-color: #c1c1c1;
         }
+
         html, body {
             margin: 0;
             padding: 0;
             overflow: hidden;
             font-family: monospace;
         }
+
+        a, a:visited, a:active, a:hover {
+            color: blue;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .right {
+            text-align: right;
+        }
+
         #canvas {
             width: 100vw;
             height: 100vh;
         }
-        .number {
+
+        #info-button {
             position: absolute;
-            color: #000000;
-            font-size: 8pt;
+            right: 180px;
+            top: 10px;
+            font-family: monospace;
+            font-size: 20pt;
+            border-radius: 60px;
+            border: 1px solid black;
+            padding: 0 6px;
+            user-select: none;
+            cursor: pointer;
+            overflow: hidden;
+
+            width: 11px;
+            transition: width 0.2s;
+        }
+
+        #info-button:hover {
+            width: 57px;
+        }
+
+        #info-window {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--background-color);
+            user-select: none;
+            width: 500px;
         }
 
         #controls {
@@ -30,14 +72,27 @@
             right: 10px;
             top: 10px;
             background-color: var(--background-color);
+            user-select: none;
         }
 
-        #controls legend {
-            background-color: white;
+        legend {
+            background-color: black;
+            color: lightgray;
+            padding: 4px;
         }
 
-        #controls label {
+        #controls fieldset > label {
             display: block;
+        }
+
+        .check {
+            margin: 10px 0 0 -4px;
+        }
+
+        .check label {
+            position: relative;
+            top: -3px;
+            left: -3px;
         }
     </style>
 </head>
@@ -45,15 +100,45 @@
 
 <canvas id="canvas"></canvas>
 
+<div id="info-button">
+    info
+</div>
+
+<div id="info-window" class="hidden">
+    <fieldset>
+        <legend>About prime spiral</legend>
+
+        <p>This demo is based on <a href="https://www.youtube.com/watch?v=iFuR97YcSLM" target="_blank">
+            this awesome Numberphile video</a> about Ulam spirals. My rendition uses Archimedean spirals instead, which
+            are also covered by Numberphile in this <a href="https://www.youtube.com/watch?v=3K-12i0jclM">other video</a>.
+        </p>
+
+        <p class="right">
+            Lucio Paiva, 2018<br>
+            <a href="http://luciopaiva.com">luciopaiva.com</a>
+        </p>
+    </fieldset>
+</div>
+
 <div id="controls">
     <fieldset>
         <legend>Spiral settings</legend>
 
-        <label for="radius">Radius delta</label>
-        <input type="range" id="radius" name="volume" min="0.1" max="10" value="10" step="0.1" />
+        <label for="number-spacing">Spacing</label>
+        <input type="range" id="number-spacing" name="volume" min="10" max="50" value="39.5" step="0.1" />
 
         <label for="angle">Angle delta</label>
         <input type="range" id="angle" name="cowbell" min="0.01" max="1000" value="0.01" step="0.01" />
+
+        <div class="check">
+            <input type="checkbox" id="show-numbers">
+            <label for="show-numbers">Show numbers</label>
+        </div>
+
+        <div class="check">
+            <input type="checkbox" id="only-primes">
+            <label for="only-primes">Only primes</label>
+        </div>
 
     </fieldset>
 </div>
