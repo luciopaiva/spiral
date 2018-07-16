@@ -8,7 +8,7 @@
         :root {
             --background-color: #d4d4d4;
             --stroke-color: #bbbbbb;
-            --prime-color: #ff153c;
+            --prime-color: #0b01ff;
             --non-prime-color: #c1c1c1;
         }
 
@@ -48,6 +48,8 @@
             user-select: none;
             cursor: pointer;
             overflow: hidden;
+            background-color: black;
+            color: lightgray;
 
             width: 11px;
             transition: width 0.2s;
@@ -125,10 +127,10 @@
         <legend>Spiral settings</legend>
 
         <label for="number-spacing">Spacing</label>
-        <input type="range" id="number-spacing" name="volume" min="10" max="50" value="39.5" step="0.1" />
+        <input type="range" id="number-spacing" name="number-spacing" min="1" max="50" value="8.2" step="0.1" />
 
-        <label for="angle">Angle delta</label>
-        <input type="range" id="angle" name="cowbell" min="0.01" max="1000" value="0.01" step="0.01" />
+        <label for="radius-factor">Radius factor</label>
+        <input type="range" id="radius-factor" name="radius-factor" min="0.1" max="1" value=".4154" step="0.00001" />
 
         <div class="check">
             <input type="checkbox" id="show-numbers">
@@ -136,7 +138,7 @@
         </div>
 
         <div class="check">
-            <input type="checkbox" id="only-primes">
+            <input type="checkbox" id="only-primes" checked>
             <label for="only-primes">Only primes</label>
         </div>
 

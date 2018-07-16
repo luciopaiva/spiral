@@ -44,9 +44,9 @@ class Sieve {
 class Spiral {
 
     constructor () {
-        this.MAX_NUMBER = 5000;
+        this.MAX_NUMBER = 100000;
         this.sieve = new Sieve(this.MAX_NUMBER);
-        this.dotSize = 9;
+        this.dotSize = 5;
         this.halfDotSize = this.dotSize / 2;
 
         this.canvas = document.getElementById("canvas");
@@ -58,8 +58,8 @@ class Spiral {
 
         this.numberSpacingElement = document.getElementById("number-spacing");
         this.numberSpacingElement.addEventListener("input", this.draw.bind(this));
-        this.angleElement = document.getElementById("angle");
-        this.angleElement.addEventListener("input", this.draw.bind(this));
+        this.radiusFactorElement = document.getElementById("radius-factor");
+        this.radiusFactorElement.addEventListener("input", this.draw.bind(this));
         this.showNumbersElement = document.getElementById("show-numbers");
         this.showNumbersElement.addEventListener("input", this.draw.bind(this));
         this.onlyPrimesElement = document.getElementById("only-primes");
@@ -117,8 +117,6 @@ class Spiral {
 
             radius += 0.01;
             angle += 0.005;
-            // radius += 2;
-            // angle += Math.PI / 4;
         }
 
         ctx.stroke();
@@ -126,13 +124,12 @@ class Spiral {
 
     drawNumbers() {
         const numberSpacing = parseFloat(this.numberSpacingElement.value);
-        const angleStep = parseFloat(this.angleElement.value);
-        console.info(angleStep, numberSpacing);
+        const radiusFactor = parseFloat(this.radiusFactorElement.value);
+        console.info(numberSpacing, radiusFactor);
 
-        const radiusStep = 1;
         const rotation = 1;
 
-        let theta = 2.5;  // chord / awayStep;
+        let theta = 2.5;
         let currentRadius = 0;
 
         this.context.textAlign = "center";
@@ -165,7 +162,7 @@ class Spiral {
                 }
             }
 
-            currentRadius = radiusStep * theta;
+            currentRadius = radiusFactor * theta;
             theta += numberSpacing / currentRadius;
         }
     }
