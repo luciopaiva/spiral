@@ -191,6 +191,16 @@ class Spiral {
         return greatestNumberToShow;
     }
 
+    /**
+     * The algorithm here was taken from https://stackoverflow.com/a/13901170/778272
+     * Not perfect, but works for spreading dots at regular distances from each other.
+     *
+     * Other reference: https://math.stackexchange.com/a/2216736
+     *
+     * @param greatestNumberToShow
+     * @param radiusFactor
+     * @param numberSpacing
+     */
     drawNumbers(greatestNumberToShow, radiusFactor, numberSpacing) {
         const showNumbers = this.showNumbersElement.checked && greatestNumberToShow < this.MAX_NUMBER_BEFORE_UI_SUFFERS;
         const onlyPrimes = this.onlyPrimesElement.checked || greatestNumberToShow >= this.MAX_NUMBER_BEFORE_UI_SUFFERS;
