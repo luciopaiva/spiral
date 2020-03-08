@@ -2,7 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Spiral</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=yes">
+    <title>Prime spiral</title>
+
+    <meta name="title" content="Prime spiral">
+    <meta name="author" content="Lucio Paiva">
+    <meta name="description" content="An Archimedean spiral made with vanilla JavaScript.">
+
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Prime spiral">
+    <meta property="og:description" content="An Archimedean spiral made with vanilla JavaScript.">
+    <meta property="og:site_name" content="Lucio Paiva">
+    <meta property="og:url" content="https://luciopaiva.com/spiral/">
+    <meta property="og:image" content="https://luciopaiva.com/spiral/spiral.png">
+    <meta property="article:author" content="https://luciopaiva.com">
+    <meta property="article:published_time" content="2018-07-15T00:00:00.000Z">
+
+    <link rel="author" href="https://luciopaiva.com">
 
     <style>
         :root {
@@ -96,6 +112,24 @@
             top: -3px;
             left: -3px;
         }
+
+        #author {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+        }
+
+        .circle-portrait {
+            width: 48px;
+            border-radius: 24px;
+            box-shadow: 0 3px 3px black;
+        }
+
+        @media all and (max-width: 600px) {
+            #info-window, #info-button, #controls {
+                display: none;
+            }
+        }
     </style>
 
     <script>
@@ -158,6 +192,11 @@
 
     </fieldset>
 </div>
+
+<span id="author">
+    <a href="https://luciopaiva.com"><img class="circle-portrait" src="https://luciopaiva.com/img/avatar.jpg" alt="avatar" title="Lucio Paiva, 2018"></a>
+    <a href="https://github.com/luciopaiva/spiral"><img src="https://luciopaiva.com/img/github-logo.svg" alt="github" class="circle-portrait" title="Source code"></a>
+</span>
 
 <script src="index.js"></script>
 </body>
